@@ -1,4 +1,5 @@
 // Databricks notebook source
+// MAGIC 
 // MAGIC %md-sandbox
 // MAGIC 
 // MAGIC <div style="text-align: center; line-height: 0; padding-top: 9px;">
@@ -85,9 +86,20 @@
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-val RevenueInfo = FILL_IN
+val RevenueInfo = """Q1-2018,Exercise_Fitness,10.33; 
+                     Q1-2018,Outdoor_Play_Equipment,7.85; 
+                     Q1-2018,Winter_Sports,3.45;
+                     Q2-2018,Exercise_Fitness,7.63; 
+                     Q2-2018,Outdoor_Play_Equipment,5.05; 
+                     Q2-2018,Winter_Sports,-;
+                     Q3-2018,Exercise_Fitness,1.31; 
+                     Q3-2018,Outdoor_Play_Equipment,3.95; 
+                     Q3-2018,Winter_Sports,1.50;
+                     Q4-2018,Exercise_Fitness,5.71; 
+                     Q4-2018,Outdoor_Play_Equipment,6.52; 
+                     Q4-2018,Winter_Sports,4.15"""
 
 // COMMAND ----------
 
@@ -112,11 +124,34 @@ val RevenueInfo = FILL_IN
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-Define the method validateRecord()
+def validateRecord(recStr: String) = {
+  
+  // Split the string by comma
+  val fields = recStr.split(",")
 
-FILL_IN
+  // Wrap the code around try/catch to handle exceptions
+  try {
+  
+    // If the number of fields in the string is less than 3, then throw an exception
+    if(fields.size < 3){
+      throw new Exception("Expected 3 fields. Found only " + fields.size)
+    }
+      
+    // Convert the third field (revenue) into float type
+    val revenue = fields(2).toFloat
+    
+    // If we have reached here without any problem, then it is a good rec. Tag the record GOOD and return
+    ("GOOD", recStr)
+    
+  } catch {
+    
+    // If we have reached here then it is a bad rec. Tag the record BAD and return
+    case e: Exception => ("BAD", recStr)
+    
+  }
+}
 
 // COMMAND ----------
 
@@ -153,11 +188,26 @@ assert (test3Str == test3StrExpected, s"Expected the result to be ${test3StrExpe
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-Define the method parsetData()
+import scala.collection.immutable.Vector
 
-FILL_IN
+def parsetData(dataStr: String) = {
+  
+  // split the string by ';' to get individual record strings
+  val recList = dataStr.split(";")
+  
+  // validate each record
+  val allRecs = recList.map(rec => validateRecord(rec.trim) )
+  
+  // based on GOOD and BAD tag, store in goodRecs and badRecs variable
+  val goodRecs = allRecs.filter(rec => rec._1 == "GOOD")
+  val badRecs = allRecs.filter(rec => rec._1 == "BAD")
+
+  // return the tuple
+  (goodRecs, badRecs)
+  
+}
 
 // COMMAND ----------
 
@@ -170,11 +220,9 @@ FILL_IN
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-Filter out good and bad records and assign to variables goodrecs and badrecs respectively
-
-FILL_IN
+val (goodrecs, badrecs) = parsetData(RevenueInfo)
 
 // COMMAND ----------
 
@@ -202,11 +250,9 @@ assert (badrecsLen == badrecsLenExpected, s"Expected the result to be ${badrecsL
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-Define a case class CategoryQuarterlyRecord 
-
-FILL_IN
+case class CategoryQuarterlyRecord(quarter:String, category:String, revenue:Float)
 
 // COMMAND ----------
 
@@ -220,11 +266,19 @@ FILL_IN
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-Define the method convertToClass()
+// Define the method convertToClass()
 
-FILL_IN
+def convertToClass(goodrec: String): CategoryQuarterlyRecord = {
+  
+  // split the record by ','
+  val fields = goodrec.split(",")
+
+  // create and return the case class
+  CategoryQuarterlyRecord(fields(0), fields(1), fields(2).toFloat)
+  
+}
 
 // COMMAND ----------
 
@@ -246,9 +300,9 @@ assert (caseClass == caseClassExpected, s"Expected the result to be ${caseClassE
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-val categoryRecs = FILL_IN
+val categoryRecs = goodrecs.map(rec => convertToClass(rec._2))
 
 // COMMAND ----------
 
@@ -273,11 +327,25 @@ assert (categoryRecsLen == categoryRecsLenExpected, s"Expected the result to be 
 
 // COMMAND ----------
 
-//TODO
+//ANSWERS
 
-Define the class CompanyPerformance
-
-FILL_IN
+class CompanyPerformance(val _catRecs: Array[CategoryQuarterlyRecord]){
+  
+  // class level variable to store the good records
+  def CategoryRecs = _catRecs
+  
+  // calculates and returns the total revenue across all quarters and categories
+  def getTotalRevenue() = CategoryRecs.map(rec => rec.revenue).reduceLeft(_ + _)
+  
+  // calculates and returns total revenue by the cateogry (passed as argument to the function)
+  def getCategoryRevenue(_category: String): Float = {
+    
+    // filter records by category, extract revenue column and sum up
+    CategoryRecs.filter(rec => rec.category == _category).map(rec => rec.revenue).reduceLeft(_ + _)
+    
+  }
+  
+}
 
 // COMMAND ----------
 
@@ -292,13 +360,11 @@ FILL_IN
 
 // COMMAND ----------
 
-//TODO
+// ANSWERS
 
-Calculate and store company revenue performance information into the variables below
-
-val companyPerf2018 = FILL_IN
-val totalRevenue = FILL_IN
-val totalRevenueInCategory = FILL_IN
+val companyPerf2018 = new CompanyPerformance(categoryRecs)
+val totalRevenue = companyPerf2018.getTotalRevenue()
+val totalRevenueInCategory = companyPerf2018.getCategoryRevenue("Exercise_Fitness")
 
 // COMMAND ----------
 
