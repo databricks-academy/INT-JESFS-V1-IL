@@ -1,5 +1,4 @@
 // Databricks notebook source
-// MAGIC 
 // MAGIC %md # Course: JESFS
 // MAGIC * Version 1.1.0
 // MAGIC * Built 2020-09-02 23:51:27 UTC
