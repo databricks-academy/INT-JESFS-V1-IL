@@ -30,6 +30,7 @@
 # MAGIC   f"{home}/Optional/JES 08 - String and Utility Functions",
 # MAGIC   f"{home}/Optional/JES 09 - Exceptions",
 # MAGIC   
+# MAGIC   # Not expected to compile
 # MAGIC   # f"{home}/Labs/JES 02L - Values, Variables, Data Types Lab",
 # MAGIC   # f"{home}/Labs/JES 03L - Conditional and Control Statements Lab",
 # MAGIC   # f"{home}/Labs/JES 04L - Methods, Functions, Packages Lab",
